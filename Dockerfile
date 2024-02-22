@@ -32,9 +32,6 @@ RUN pip install dist/*.whl
 # install dependencies as wheels
 RUN pip wheel --no-cache-dir --wheel-dir=/wheels/ -r requirements.txt
 
-# install semantic-cache [Experimental]- we need this here and not in requirements.txt because redisvl pins to pydantic 1.0 
-RUN pip install redisvl==0.0.7 --no-deps
-
 # Runtime stage
 FROM $LITELLM_RUNTIME_IMAGE as runtime
 
@@ -50,9 +47,16 @@ COPY --from=builder /wheels/ /wheels/
 # Install the built wheel using pip; again using a wildcard if it's the only file
 RUN pip install *.whl /wheels/* --no-index --find-links=/wheels/ && rm -f *.whl && rm -rf /wheels
 
+# install semantic-cache [Experimental]- we need this here and not in requirements.txt because redisvl pins to pydantic 1.0 
+RUN pip install redisvl==0.0.7 --no-deps
+
+# Generate prisma client
+RUN prisma generate
 RUN chmod +x entrypoint.sh
 
 EXPOSE 4000/tcp
 
+# # Set your entrypoint and command
+
 ENTRYPOINT ["litellm"]
-CMD ["--port", "4000", "--config", "./proxy_server_config.yaml", "--detailed_debug", "--run_gunicorn"]
+CMD ["--port", "4000", "--run_gunicorn"]
