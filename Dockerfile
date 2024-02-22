@@ -59,4 +59,4 @@ EXPOSE 4000/tcp
 # # Set your entrypoint and command
 
 ENTRYPOINT ["litellm"]
-CMD ["--port", "4000", "--run_gunicorn"]
+CMD ["--config","./proxy_server_config.yaml","--port", "4000", "--run_gunicorn"]
